@@ -1,0 +1,37 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+h1 {
+    font-size: 24px;
+    color: #0056b3;
+}
+.category {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 10px;
+}
+.date {
+    font-size: 14px;
+    color: #777;
+}
+.content {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-top: 20px;
+}
+.image {
+    width: 100%;
+    height: auto;
+    margin: 20px 0;
+}
