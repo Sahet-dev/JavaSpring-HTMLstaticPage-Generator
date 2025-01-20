@@ -1,46 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Simple Web App</title>
+    <title>Create Static HTML</title>
     <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #2c3e50;
+            --background-color: #f5f6fa;
+            --input-background: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --spacing: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: var(--spacing);
         }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--input-background);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         h1 {
-            color: #4CAF50;
+            color: var(--secondary-color);
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
         }
-        p {
-            font-size: 1.2em;
+
+        .form-group {
+            margin-bottom: 1.5rem;
         }
-        .button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e1e1;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background-color: var(--input-background);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            background-color: var(--primary-color);
             color: white;
+            padding: 0.75rem 1.5rem;
             border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
             cursor: pointer;
-            border-radius: 5px;
+            width: 100%;
+            transition: background-color 0.3s ease;
         }
-        .button:hover {
-            background-color: #45a049;
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            input, textarea, button {
+                padding: 0.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .container {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-<h1>Welcome to Simple Web App Template</h1>
-<p>This is the home page of your Spring Boot application.</p>
-
-<!-- Button or link to navigate to another page -->
-<!-- Option 1: Button to another HTML page -->
-<form action="/new" method="get">
-    <button class="button" type="submit">Create</button>
-</form>
-
-<!-- Option 2: Link to another HTML page -->
-<!-- <a href="/about"><button class="button">Go to About Page</button></a> -->
+<div class="container">
+    <h1>Generate Static HTML</h1>
+    <form th:action="@{/generate}" method="post">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" placeholder="Enter the title" required>
+        </div>
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="" disabled selected>Select a category</option>
+                <option value="Technology">Technology</option>
+                <option value="Health">Health</option>
+                <option value="Sports">Sports</option>
+                <option value="Business">Business</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="World">World</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required>
+        </div>
+        <div class="form-group">
+            <label for="imageUrl">Image URL</label>
+            <input type="url" id="imageUrl" name="imageUrl" placeholder="Enter the image URL" required>
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            <textarea id="content" name="content" rows="5" placeholder="Enter the content" required></textarea>
+        </div>
+        <button type="submit">Generate HTML</button>
+    </form>
+</div>
 </body>
 </html>

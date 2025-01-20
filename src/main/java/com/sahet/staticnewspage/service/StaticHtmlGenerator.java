@@ -1,21 +1,15 @@
-package com.sahet.newsbackend.service;
+package com.sahet.staticnewspage.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.Arrays;
 
 public class StaticHtmlGenerator {
 
-    // List to store all generated HTML filenames
-    private static final List<String> generatedFiles = new ArrayList<>();
-
-    // Method to generate static HTML content for each specific document
     public static void generateHtml(String title, String category, String date, String imageUrl, String content, String outputFileName) {
-        // Define the static HTML content (will be different based on input parameters)
+        // Define the HTML template
         String htmlContent = """
             <!DOCTYPE html>
             <html lang="en">
@@ -23,46 +17,8 @@ public class StaticHtmlGenerator {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta http-equiv="X-UA-Compatible" content="ie=edge">
+                <link rel="stylesheet" href="/styles/article.css">
                 <title>%s</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f4f9;
-                        color: #333;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .container {
-                        width: 80%;
-                        margin: 20px auto;
-                        background-color: #fff;
-                        padding: 20px;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                    }
-                    h1 {
-                        font-size: 24px;
-                        color: #0056b3;
-                    }
-                    .category {
-                        font-size: 14px;
-                        color: #777;
-                        margin-bottom: 10px;
-                    }
-                    .date {
-                        font-size: 14px;
-                        color: #777;
-                    }
-                    .content {
-                        font-size: 16px;
-                        line-height: 1.6;
-                        margin-top: 20px;
-                    }
-                    .image {
-                        width: 100%;
-                        height: auto;
-                        margin: 20px 0;
-                    }
-                </style>
             </head>
             <body>
                 <div class="container">
@@ -81,62 +37,98 @@ public class StaticHtmlGenerator {
         // Format the HTML content with the provided dynamic values
         htmlContent = String.format(htmlContent, title, title, category, date, imageUrl, content);
 
-        // Create the output file in a directory (make sure the directory exists)
-        File file = new File("static/" + outputFileName);
+        // Ensure the "articles" directory exists
+        File directory = new File("src/main/resources/static/articles/");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        // Write the formatted content to the output file
+        File file = new File(directory, outputFileName);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(htmlContent);
-            System.out.println("Static HTML file '" + outputFileName + "' created successfully!");
+            System.out.println("Static HTML file '" + file.getAbsolutePath() + "' created successfully!");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error writing the HTML file: " + e.getMessage());
         }
+
+        // Update the index.html
+        updateIndexPage();
     }
 
-    // Method to update the index.html file with a list of generated HTML files
-    private static void updateIndexPage() {
-        // Define the HTML structure for the index page
-        StringBuilder indexContent = new StringBuilder();
-        indexContent.append("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n");
-        indexContent.append("<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
-        indexContent.append("<title>Index of Static Pages</title>\n</head>\n<body>\n");
-        indexContent.append("<h1>Index of All Static HTML Pages</h1>\n<ul>\n");
+    public static void updateIndexPage() {
+        File articlesDirectory = new File("src/main/resources/static/articles/");
+        File[] files = articlesDirectory.listFiles((dir, name) -> name.endsWith(".html"));
 
-        // Add links to each generated HTML file in the index page
-        for (String fileName : generatedFiles) {
-            indexContent.append("<li><a href=\"" + fileName + "\">" + fileName + "</a></li>\n");
+        if (files == null || files.length == 0) {
+            System.out.println("No articles found to update the index page.");
+            return;
         }
 
-        indexContent.append("</ul>\n</body>\n</html>");
+        // Start building the index page content
+        StringBuilder indexContent = new StringBuilder("""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Generated Articles</title>
+            <link rel="stylesheet" href="/styles/index.css">
+            <link rel="stylesheet" href="../static/styles/index.css">
+        </head>
+        <body>
+            <h1>Latest News</h1>
+                <div class="container">
+                    <div class="articles-section">
+    """);
 
-        // Create or update the index.html file
-        File indexFile = new File("index.html");
+        // Add each article to the index page
+        Arrays.stream(files).forEach(file -> {
+            String fileName = file.getName();
+            String link = "/articles/" + fileName;
+
+            // Parse details from the file name (assuming file names follow a consistent pattern)
+            String title = fileName.replace("_", " ").replace(".html", ""); // Simple parsing for demonstration
+            String category = "Unknown"; // This needs to be retrieved dynamically from metadata
+            String date = "Unknown"; // This needs to be retrieved dynamically from metadata
+            String imageUrl = "/path/to/default/image.jpg"; // Default or parsed value
+
+            // Append the HTML for each article
+            indexContent.append(String.format("""
+                    <div class="article-card">
+                <!-- Text Section -->
+                        <div class="text">
+                            <span class="category-badge">%s</span>
+                            <h3 class="article-title"><a href="%s">%s</a></h3>
+                            <div class="article-date">%s</div>
+                        </div>
+
+                <!-- Image Section -->
+                        <div class="image article-image">
+                            <a href="%s"><img src="%s" alt="%s"></a>
+                        </div>
+                    </div>
+        """, category, link, title, date, link, imageUrl, title));
+        });
+
+        // Close the HTML structure
+        indexContent.append("""
+                </div>
+            </div>
+        </body>
+        </html>
+    """);
+
+        // Save the index.html file in the templates directory
+        File indexFile = new File("src/main/resources/templates/index.html");
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(indexFile))) {
             writer.write(indexContent.toString());
-            System.out.println("Index page 'index.html' updated successfully!");
+            System.out.println("Index page updated: " + indexFile.getAbsolutePath());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error writing the index.html file: " + e.getMessage());
         }
     }
 
-    public static void main(String[] args) {
-        // Example 1: First article
-        generateHtml(
-                "Tramp bütin materigi eýelemekçi: hemmä haýran galdy",
-                "Entertainment",
-                "2025-01-11",
-                "https://storage.kun.uz/source/thumbnails/_medium/10/8FVdC_BtO2BcHgYA9pJAmFROQ-uyLGPL_medium.jpg",
-                "Çeşme: kun.uz, awtor: Ötkir Jalolhonow ...",
-                "article1.html"
-        );
-
-        // Example 2: Second article
-        generateHtml(
-                "Another Dynamic Article Title",
-                "News",
-                "2025-01-12",
-                "https://example.com/image.jpg",
-                "This is the content of the second article...",
-                "article2.html"
-        );
-    }
 }
